@@ -15,7 +15,6 @@
             width: 100%;
         }
 
-        /* 1. Remove fixed width, 2. Container fix */
         .evm-container {
             width: 100%;
             max-width: 100%;
@@ -39,41 +38,43 @@
         .vote-card-inner {
             background: #e0e0e0;
             border-radius: 4px;
-            padding: 15px;
+            padding: 10px;
             border: 2px solid #999;
             width: 100%;
             box-sizing: border-box;
-            /* 5. Allow horizontal scroll if needed */
-            overflow-x: auto;
+            overflow: hidden;
+            /* Removed horizontal scroll! */
         }
 
         .position-badge {
             background: #111;
             color: #fff;
-            padding: 10px 20px;
-            font-size: 20px;
+            padding: 10px 15px;
+            font-size: 18px;
             font-weight: bold;
-            margin: -15px -15px 15px -15px;
+            margin: -10px -10px 10px -10px;
             border-bottom: 3px solid #666;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        /* 4. Candidate rows - Flex layout, prevent wrapping */
+        /* Forces the row to never stack or wrap */
         .candidate-evm-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: #f0f0f0;
             border: 1px solid #ccc;
-            margin-bottom: 8px;
-            padding: 10px;
+            margin-bottom: 6px;
+            padding: 8px;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
             color: #111;
             flex-wrap: nowrap;
             transition: background 0.2s, border-color 0.2s;
-            gap: 15px;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .candidate-evm-row.voted {
@@ -85,11 +86,12 @@
             display: flex;
             justify-content: center;
             flex-shrink: 0;
+            width: 60px;
         }
 
         .cand-part-photo img {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
             border: 3px solid #555;
             border-radius: 4px;
@@ -98,25 +100,38 @@
         }
 
         .cand-part-info {
-            flex-grow: 1;
+            flex: 1;
+            /* Flexible width */
+            min-width: 0;
+            /* Important for flex truncation! */
             display: flex;
             align-items: center;
             border-right: 2px solid #ccc;
-            height: 70px;
-            padding-right: 15px;
-            white-space: nowrap;
+            height: 60px;
+            padding: 0 10px;
         }
 
         .cand-part-name {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            /* Allows truncation */
+            flex: 1;
+        }
+
+        .cand-part-symbol {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
 
         .cand-part-symbol img {
-            width: 45px;
-            height: 45px;
-            margin-left: 15px;
+            width: 35px;
+            height: 35px;
+            margin-left: 10px;
             object-fit: contain;
         }
 
@@ -125,38 +140,41 @@
             justify-content: center;
             align-items: center;
             flex-shrink: 0;
-            padding-right: 15px;
+            padding: 0 10px;
+            width: 40px;
         }
 
         .evm-btn-part {
             flex-shrink: 0;
         }
 
-        /* 6. Touch-friendly sizing */
+        /* Touch-friendly sizing */
         .evm-btn {
             background: #1976D2;
             border: 2px solid #0D47A1;
             border-radius: 6px;
-            width: 75px;
-            min-height: 50px;
+            width: 65px;
+            height: 45px;
             cursor: pointer;
             box-shadow:
-                inset 0 3px 5px rgba(255, 255, 255, 0.4),
-                inset 0 -3px 5px rgba(0, 0, 0, 0.2),
-                0 6px 0 #0D47A1,
-                0 8px 10px rgba(0, 0, 0, 0.5);
+                inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+                0 4px 0 #0D47A1,
+                0 6px 8px rgba(0, 0, 0, 0.5);
             position: relative;
             outline: none;
             transition: transform 0.1s, box-shadow 0.1s;
             overflow: hidden;
             display: block;
+            flex-shrink: 0;
+            /* Important */
         }
 
         .evm-btn:active {
-            transform: translateY(6px);
+            transform: translateY(4px);
             box-shadow:
-                inset 0 3px 5px rgba(255, 255, 255, 0.4),
-                inset 0 -3px 5px rgba(0, 0, 0, 0.2),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2),
                 0 0px 0 #0D47A1,
                 0 2px 4px rgba(0, 0, 0, 0.5);
         }
@@ -189,7 +207,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -198,18 +216,19 @@
 
         .lock-msg {
             color: #4CAF50;
-            font-size: 40px;
+            font-size: 32px;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
             text-align: center;
+            padding: 0 20px;
         }
 
         .lock-sub {
-            color: #ccc;
+            color: #ddd;
             margin-top: 15px;
-            font-size: 18px;
+            font-size: 16px;
             text-align: center;
         }
 
@@ -226,11 +245,11 @@
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             text-transform: uppercase;
-            padding: 20px 40px;
-            box-shadow: 0 8px 15px rgba(46, 204, 113, 0.4);
+            padding: 15px 30px;
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.4);
             cursor: pointer;
             transition: all 0.2s;
             width: 100%;
@@ -240,72 +259,72 @@
 
         .btn-finish:active {
             transform: translateY(4px);
-            box-shadow: 0 4px 5px rgba(46, 204, 113, 0.4);
+            box-shadow: 0 2px 4px rgba(46, 204, 113, 0.4);
         }
 
-        /* Mobile specific fixes to override global style.css absolute positioning and compactly fit UI */
+        /* Mobile specific fixes to scale down proportionally into one row! */
         @media (max-width: 600px) {
             .candidate-evm-row {
-                min-width: 350px !important;
-                /* Forces it to scroll gracefully instead of wrapping if smaller */
-                padding: 5px !important;
-                gap: 5px !important;
+                padding: 4px !important;
+                gap: 4px !important;
             }
 
             .cand-part-photo {
-                width: 55px !important;
+                width: 40px !important;
             }
 
             .cand-part-photo img {
-                width: 50px !important;
-                height: 50px !important;
-                border-width: 2px !important;
+                width: 40px !important;
+                height: 40px !important;
+                border-width: 1px !important;
             }
 
             .cand-part-info {
-                height: 50px !important;
-                padding: 0 5px !important;
+                height: 40px !important;
+                padding: 0 4px !important;
+                border-right-width: 1px !important;
             }
 
             .cand-part-name {
-                font-size: 15px !important;
+                font-size: 14px !important;
             }
 
             .cand-part-symbol img {
-                width: 25px !important;
-                height: 25px !important;
-                margin-left: 5px !important;
+                width: 20px !important;
+                height: 20px !important;
+                margin-left: 4px !important;
             }
 
             .cand-part-indicator {
-                padding: 0 5px !important;
-                width: 30px !important;
+                padding: 0 !important;
+                width: 20px !important;
             }
 
-            /* Overrides the absolute right/top from style.css */
+            /* Explicitly ensuring LED stays relative and in flow */
             .led-indicator {
                 position: relative !important;
                 right: auto !important;
                 top: auto !important;
-                width: 20px !important;
-                height: 20px !important;
+                width: 16px !important;
+                height: 16px !important;
                 margin: 0 !important;
             }
 
             .evm-btn-part {
-                padding-left: 5px !important;
-                padding-right: 5px !important;
+                padding-left: 2px !important;
+                padding-right: 2px !important;
             }
 
             .evm-btn {
-                width: 60px !important;
-                min-height: 45px !important;
-                height: 45px !important;
+                width: 45px !important;
+                height: 35px !important;
+                border-width: 1px !important;
             }
 
             .position-badge {
-                font-size: 16px !important;
-                padding: 8px 15px !important;
+                font-size: 14px !important;
+                padding: 6px 10px !important;
+                margin: -10px -10px 10px -10px !important;
             }
         }
     </style>
