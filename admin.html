@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Madrasah Election System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-data-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-top: 5px solid var(--primary-accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" style="max-width: 1000px;">
+        <div class="top-bar">
+            <a href="index.html" class="back-btn">⬅ Back to Home</a>
+            <h1 style="margin: 0; font-size: 24px;">Admin Panel</h1>
+            <button onclick="resetAllVotes()" class="btn btn-danger"
+                style="padding: 10px 15px; font-size: 14px; min-height: 40px;">⚠️ Reset All Votes</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <!-- Add Position Form -->
+            <div class="position-card" style="border-left: none; border-top: 5px solid var(--warning);">
+                <h2>Add New Position</h2>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Position Title</label>
+                    <input type="text" id="posTitle" class="form-control" placeholder="e.g. Madrasa Leader">
+                </div>
+                <button onclick="addPosition()" class="btn btn-primary" style="width: 100%;">Add Position</button>
+            </div>
+
+            <!-- Add Candidate Form -->
+            <div class="position-card" style="border-left: none; border-top: 5px solid var(--success);">
+                <h2>Add Candidate</h2>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Select Position</label>
+                    <select id="candPosition" class="form-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>Candidate Name</label>
+                    <input type="text" id="candName" class="form-control" placeholder="e.g. Ali">
+                </div>
+                <div class="form-group">
+                    <label>Candidate Photo</label>
+                    <input type="file" id="candPhoto" class="file-input" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>Candidate Symbol (Optional)</label>
+                    <input type="file" id="candSymbol" class="file-input" accept="image/*">
+                </div>
+                <button onclick="addCandidate()" class="btn btn-primary" style="width: 100%;">Add Candidate</button>
+            </div>
+        </div>
+
+        <div class="header" style="margin-top: 40px; text-align: left; padding-bottom: 10px;">
+            <h2>Current Election Data</h2>
+        </div>
+
+        <div id="dataView"></div>
+    </div>
+
+    <!-- Edit Candidate Modal (Simulated) -->
+    <!-- Keeping it simple: To edit, just delete and add again. Or we can add edit later if strictly required natively. Instruction says "Implement Edit/Delete Candidate & Position". Let's add basic inline delete. -->
+
+    <script src="script.js"></script>
+    <script>
+        // Admin UI Scripts
+        function loadAdminUI() {
+            const data = db.getData();
+
+            // Populate Dropdown
+            const select = document.getElementById('candPosition');
+            select.innerHTML = '<option value="">-- Select Position --</option>';
+            data.positions.forEach(pos => {
+                select.innerHTML += `<option value="${pos.id}">${pos.title}</option>`;
+            });
+
+            // Render Data View
+            const dataView = document.getElementById('dataView');
+            dataView.innerHTML = '';
+
+            if (data.positions.length === 0) {
+                dataView.innerHTML = '<p style="color: var(--text-secondary); text-align: center; margin-top: 20px;">No positions added yet. Add a position above to get started.</p>';
+            }
+
+            data.positions.forEach(pos => {
+                let html = `
+                <div class="admin-data-card">
+                    <div class="position-title" style="margin-bottom: 20px;">
+                        <span><b style="color: var(--warning);">[Pos]</b> ${pos.title}</span>
+                        <button onclick="deletePosition('${pos.id}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 14px; min-height: 30px; border-radius: 4px;">Delete Position</button>
+                    </div>
+                    <div class="candidate-list">`;
+
+                if (pos.candidates.length === 0) {
+                    html += `<p style="color: #666; font-style: italic;">No candidates added to this position.</p>`;
+                } else {
+                    pos.candidates.forEach(cand => {
+                        html += `
+                        <div class="candidate-row" style="background: #222; border: 1px solid #333; padding: 10px;">
+                            ${cand.photo ? `<img src="${cand.photo}" style="width: 50px; height: 50px; border-radius: 4px; object-fit: cover;">` : `<div style="width: 50px; height: 50px; background: #444; border-radius: 4px;"></div>`}
+                            <div class="candidate-info">
+                                <div style="font-size: 18px; font-weight: bold;">${cand.name}</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">Current Votes: <span style="color: var(--success); font-weight: bold;">${cand.votes}</span></div>
+                            </div>
+                            ${cand.symbol ? `<img src="${cand.symbol}" style="width: 30px; height: 30px; object-fit: contain; margin-right: 15px;">` : ''}
+                            <button onclick="deleteCandidate('${pos.id}', '${cand.id}')" class="btn" style="padding: 6px 12px; min-height: 30px; border-color: var(--danger); color: var(--danger); font-size: 14px;">Delete Candidate</button>
+                        </div>`;
+                    });
+                }
+
+                html += `</div></div>`;
+                dataView.innerHTML += html;
+            });
+        }
+
+        function addPosition() {
+            const input = document.getElementById('posTitle');
+            const title = input.value.trim();
+            if (!title) return alert("Enter a position title!");
+
+            const data = db.getData();
+            data.positions.push({
+                id: db.generateId(),
+                title: title,
+                candidates: []
+            });
+
+            db.saveData(data);
+            input.value = '';
+            loadAdminUI();
+        }
+
+        async function addCandidate() {
+            const posId = document.getElementById('candPosition').value;
+            const name = document.getElementById('candName').value.trim();
+            const photoInput = document.getElementById('candPhoto');
+            const symbolInput = document.getElementById('candSymbol');
+
+            if (!posId) return alert("Please select a position first!");
+            if (!name) return alert("Please enter the candidate's name!");
+            if (photoInput.files.length === 0) return alert("Please upload a candidate photo!");
+
+            try {
+                const photoBtn = document.querySelector('button[onclick="addCandidate()"]');
+                photoBtn.innerText = "Processing...";
+                photoBtn.disabled = true;
+
+                const photo = await fileToBase64(photoInput.files[0]);
+                const symbol = symbolInput.files.length > 0 ? await fileToBase64(symbolInput.files[0]) : "";
+
+                const data = db.getData();
+                const pos = data.positions.find(p => p.id === posId);
+
+                if (pos) {
+                    pos.candidates.push({
+                        id: db.generateId(),
+                        name: name,
+                        photo: photo,
+                        symbol: symbol,
+                        votes: 0
+                    });
+                    db.saveData(data);
+
+                    // Reset Form
+                    document.getElementById('candPosition').value = '';
+                    document.getElementById('candName').value = '';
+                    photoInput.value = '';
+                    symbolInput.value = '';
+                    alert("Candidate added successfully!");
+                    loadAdminUI();
+                }
+
+                photoBtn.innerText = "Add Candidate";
+                photoBtn.disabled = false;
+            } catch (e) {
+                console.error("Error base64 image conversion", e);
+                alert("Failed to process image file. Ensure it is a valid image.");
+                document.querySelector('button[onclick="addCandidate()"]').innerText = "Add Candidate";
+                document.querySelector('button[onclick="addCandidate()"]').disabled = false;
+            }
+        }
+
+        function deletePosition(posId) {
+            if (!confirm("Are you sure you want to completely delete this position and all its candidates?")) return;
+            const data = db.getData();
+            data.positions = data.positions.filter(p => p.id !== posId);
+            db.saveData(data);
+            loadAdminUI();
+        }
+
+        function deleteCandidate(posId, candId) {
+            if (!confirm("Remove this candidate?")) return;
+            const data = db.getData();
+            const pos = data.positions.find(p => p.id === posId);
+            if (pos) {
+                pos.candidates = pos.candidates.filter(c => c.id !== candId);
+                db.saveData(data);
+                loadAdminUI();
+            }
+        }
+
+        function resetAllVotes() {
+            if (!confirm("⚠️ WARNING: This will reset ALL votes to ZERO! Are you absolutely sure?")) return;
+            const data = db.getData();
+            let count = 0;
+            data.positions.forEach(pos => {
+                pos.candidates.forEach(cand => {
+                    cand.votes = 0;
+                    count++;
+                });
+            });
+            db.saveData(data);
+            alert(`Successfully reset votes for ${count} candidates.`);
+            loadAdminUI();
+        }
+
+        // Add responsiveness to grid layout via CSS injected dynamically for simplicity
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @media (max-width: 768px) {
+                .container > div[style*="grid-template-columns: 1fr 1fr;"] {
+                    grid-template-columns: 1fr !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Init
+        document.addEventListener('DOMContentLoaded', loadAdminUI);
+    </script>
+</body>
+
+</html>

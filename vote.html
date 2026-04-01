@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Machine - Madrasah Election</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #0a0a0a;
+            margin: 0;
+            padding: 0;
+            display: block;
+            width: 100%;
+        }
+
+        /* 1. Remove fixed width, 2. Container fix */
+        .evm-container {
+            width: 100%;
+            max-width: 100%;
+            min-height: 100vh;
+            padding: 10px;
+            box-sizing: border-box;
+            padding-bottom: 50px;
+        }
+
+        .vote-card {
+            background: #d9d9d9;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 30px;
+            border: 4px solid #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .vote-card-inner {
+            background: #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            border: 2px solid #999;
+            width: 100%;
+            box-sizing: border-box;
+            /* 5. Allow horizontal scroll if needed */
+            overflow-x: auto;
+        }
+
+        .position-badge {
+            background: #111;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            margin: -15px -15px 15px -15px;
+            border-bottom: 3px solid #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 4. Candidate rows - Flex layout, prevent wrapping */
+        .candidate-evm-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            margin-bottom: 8px;
+            padding: 10px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            color: #111;
+            flex-wrap: nowrap;
+            transition: background 0.2s, border-color 0.2s;
+            gap: 15px;
+        }
+
+        .candidate-evm-row.voted {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .cand-part-photo {
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cand-part-photo img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border: 3px solid #555;
+            border-radius: 4px;
+            background: #fff;
+            aspect-ratio: 1 / 1;
+        }
+
+        .cand-part-info {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            border-right: 2px solid #ccc;
+            height: 70px;
+            padding-right: 15px;
+            white-space: nowrap;
+        }
+
+        .cand-part-name {
+            font-size: 22px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .cand-part-symbol img {
+            width: 45px;
+            height: 45px;
+            margin-left: 15px;
+            object-fit: contain;
+        }
+
+        .cand-part-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            padding-right: 15px;
+        }
+
+        .evm-btn-part {
+            flex-shrink: 0;
+        }
+
+        /* 6. Touch-friendly sizing */
+        .evm-btn {
+            background: #1976D2;
+            border: 2px solid #0D47A1;
+            border-radius: 6px;
+            width: 75px;
+            min-height: 50px;
+            cursor: pointer;
+            box-shadow:
+                inset 0 3px 5px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 5px rgba(0, 0, 0, 0.2),
+                0 6px 0 #0D47A1,
+                0 8px 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            outline: none;
+            transition: transform 0.1s, box-shadow 0.1s;
+            overflow: hidden;
+            display: block;
+        }
+
+        .evm-btn:active {
+            transform: translateY(6px);
+            box-shadow:
+                inset 0 3px 5px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 5px rgba(0, 0, 0, 0.2),
+                0 0px 0 #0D47A1,
+                0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .evm-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            opacity: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, opacity 0.3s;
+        }
+
+        .evm-btn:active::after {
+            width: 120px;
+            height: 120px;
+            opacity: 1;
+            transition: 0s;
+        }
+
+        #dim-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .lock-msg {
+            color: #4CAF50;
+            font-size: 40px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            text-align: center;
+        }
+
+        .lock-sub {
+            color: #ccc;
+            margin-top: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        #finishBlock {
+            display: none;
+            text-align: center;
+            padding: 30px 10px 80px 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-finish {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 20px 40px;
+            box-shadow: 0 8px 15px rgba(46, 204, 113, 0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 400px;
+            white-space: nowrap;
+        }
+
+        .btn-finish:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 5px rgba(46, 204, 113, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="dim-overlay">
+        <div class="lock-msg" id="lock-msg-text">Vote Verified ✔</div>
+        <div class="lock-sub">Please wait for system reset...</div>
+    </div>
+
+    <!-- 3. Fullscreen layout header -->
+    <div
+        style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; background: #111; border-bottom: 2px solid #333; position: sticky; top: 0; z-index: 100; box-sizing: border-box;">
+        <h2 style="color: var(--primary-accent); margin: 0; font-size: 20px; white-space: nowrap;">EVM Machine</h2>
+        <div style="white-space: nowrap;">
+            <a href="index.html" class="btn"
+                style="padding: 8px 12px; min-height: 40px; font-size: 14px; display: inline-block;">Exit</a>
+            <!-- <button onclick="toggleFullScreen()" class="btn"
+                style="padding: 8px 12px; min-height: 40px; font-size: 14px; margin-left: 5px;">Fullscreen</button> -->
+        </div>
+    </div>
+
+    <!-- 1. Remove fixed width -->
+    <div class="evm-container" id="evmContainer">
+        <!-- Dynamically rendered EVM goes here -->
+    </div>
+
+    <div id="finishBlock">
+        <button class="btn-finish" onclick="submitAllVotes()">Finish Voting ✔</button>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
+        function playFinishBeep() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 1.5);
+        }
+
+        let isSystemLocked = false;
+        let currentSelections = {};
+        let totalActivePositions = 0;
+
+        function loadEVMUI() {
+            const data = db.getData();
+            const container = document.getElementById('evmContainer');
+            container.innerHTML = '';
+
+            // Safe parsing with optional chaining
+            const positions = data?.positions || [];
+            const activePositions = positions.filter(p => p?.candidates?.length > 0);
+            totalActivePositions = activePositions.length;
+
+            if (totalActivePositions === 0) {
+                container.innerHTML = '<div style="text-align:center; margin-top: 50px; border: 1px solid #e74c3c; padding: 20px; background: rgba(231,76,60,0.1); border-radius: 8px;"><h2 style="color:#e74c3c; margin:0; font-size: 20px;">No candidates available. Please add from Admin Panel</h2></div>';
+                return;
+            }
+
+            positions.forEach(pos => {
+                if (!pos?.candidates || pos.candidates.length === 0) return;
+
+                let html = `
+                <div class="vote-card" id="posBox-${pos.id}">
+                    <div class="vote-card-inner">
+                        <div class="position-badge">
+                            <span>${pos.title}</span>
+                        </div>
+                `;
+
+                pos.candidates.forEach(cand => {
+                    html += `
+                        <div class="candidate-evm-row" id="row-${pos.id}-${cand.id}">
+                            <div class="cand-part-photo">
+                                ${cand.photo ? `<img src="${cand.photo}" alt="Candidate Photo">` : `<div style="width:70px; height:70px; background:#444; border-radius:4px;"></div>`}
+                            </div>
+                            <div class="cand-part-info">
+                                <span class="cand-part-name">${cand.name}</span>
+                                ${cand.symbol ? `<span class="cand-part-symbol"><img src="${cand.symbol}" alt="Symbol"></span>` : ''}
+                            </div>
+                            <div class="cand-part-indicator">
+                                <div class="led-indicator" id="led-${pos.id}-${cand.id}"></div>
+                            </div>
+                            <div class="evm-btn-part">
+                                <button class="evm-btn" id="btn-${pos.id}-${cand.id}" 
+                                        onclick="castVote('${pos.id}', '${cand.id}')"></button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    </div>
+                </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function castVote(posId, candId) {
+            if (isSystemLocked) return;
+
+            playBeep();
+            currentSelections[posId] = candId;
+
+            document.querySelectorAll(`[id^='led-${posId}-']`).forEach(led => led.classList.remove('on'));
+            document.getElementById(`led-${posId}-${candId}`).classList.add('on');
+
+            document.querySelectorAll(`[id^='row-${posId}-']`).forEach(row => row.classList.remove('voted'));
+            document.getElementById(`row-${posId}-${candId}`).classList.add('voted');
+
+            if (Object.keys(currentSelections).length === totalActivePositions && totalActivePositions > 0) {
+                document.getElementById('finishBlock').style.display = 'block';
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        function submitAllVotes() {
+            if (isSystemLocked) return;
+            if (Object.keys(currentSelections).length !== totalActivePositions) {
+                alert("Please select exactly one candidate per position before finishing.");
+                return;
+            }
+
+            isSystemLocked = true;
+            playFinishBeep();
+
+            const data = db.getData();
+            for (const posId in currentSelections) {
+                const candId = currentSelections[posId];
+                const pos = data.positions.find(p => p.id === posId);
+                if (pos) {
+                    const cand = pos.candidates.find(c => c.id === candId);
+                    if (cand) cand.votes++;
+                }
+            }
+            db.saveData(data);
+
+            const overlay = document.getElementById('dim-overlay');
+            overlay.style.display = 'flex';
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+
+                document.querySelectorAll('.led-indicator').forEach(led => led.classList.remove('on'));
+                document.querySelectorAll('.candidate-evm-row').forEach(row => row.classList.remove('voted'));
+
+                document.getElementById('finishBlock').style.display = 'none';
+
+                currentSelections = {};
+                isSystemLocked = false;
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadEVMUI);
+    </script>
+</body>
+
+</html>
