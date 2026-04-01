@@ -242,6 +242,72 @@
             transform: translateY(4px);
             box-shadow: 0 4px 5px rgba(46, 204, 113, 0.4);
         }
+
+        /* Mobile specific fixes to override global style.css absolute positioning and compactly fit UI */
+        @media (max-width: 600px) {
+            .candidate-evm-row {
+                min-width: 350px !important;
+                /* Forces it to scroll gracefully instead of wrapping if smaller */
+                padding: 5px !important;
+                gap: 5px !important;
+            }
+
+            .cand-part-photo {
+                width: 55px !important;
+            }
+
+            .cand-part-photo img {
+                width: 50px !important;
+                height: 50px !important;
+                border-width: 2px !important;
+            }
+
+            .cand-part-info {
+                height: 50px !important;
+                padding: 0 5px !important;
+            }
+
+            .cand-part-name {
+                font-size: 15px !important;
+            }
+
+            .cand-part-symbol img {
+                width: 25px !important;
+                height: 25px !important;
+                margin-left: 5px !important;
+            }
+
+            .cand-part-indicator {
+                padding: 0 5px !important;
+                width: 30px !important;
+            }
+
+            /* Overrides the absolute right/top from style.css */
+            .led-indicator {
+                position: relative !important;
+                right: auto !important;
+                top: auto !important;
+                width: 20px !important;
+                height: 20px !important;
+                margin: 0 !important;
+            }
+
+            .evm-btn-part {
+                padding-left: 5px !important;
+                padding-right: 5px !important;
+            }
+
+            .evm-btn {
+                width: 60px !important;
+                min-height: 45px !important;
+                height: 45px !important;
+            }
+
+            .position-badge {
+                font-size: 16px !important;
+                padding: 8px 15px !important;
+            }
+        }
     </style>
 </head>
 
