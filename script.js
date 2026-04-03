@@ -22,14 +22,14 @@ const db = {
 
         // Default Fallback
         const defaultData = [
-            {
-                id: db.generateId(),
-                title: "Madrasa Leader",
-                candidates: [
-                    { id: db.generateId(), name: "Ali", photo: "", symbol: "", votes: 0 },
-                    { id: db.generateId(), name: "Hassan", photo: "", symbol: "", votes: 0 }
-                ]
-            }
+            // {
+            //     id: db.generateId(),
+            //     title: "Madrasa Leader",
+            //     candidates: [
+            //         { id: db.generateId(), name: "Ali", photo: "", symbol: "", votes: 0 },
+            //         { id: db.generateId(), name: "Hassan", photo: "", symbol: "", votes: 0 }
+            //     ]
+            // }
         ];
         db.saveData(defaultData);
         return { positions: defaultData };
