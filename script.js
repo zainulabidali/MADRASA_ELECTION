@@ -67,16 +67,49 @@ function toggleFullScreen() {
     }
 }
 
-// Convert image/file to Base64 String for localStorage storage
+// Convert image/file to Base64 String with compression for localStorage storage
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
         if (!file) {
             resolve('');
             return;
         }
+        
+        // Only process images
+        if (!file.type.startsWith('image/')) {
+            reject(new Error('File is not an image'));
+            return;
+        }
+
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Max width 300px
+                const MAX_WIDTH = 300;
+                if (width > MAX_WIDTH) {
+                    height = Math.round((MAX_WIDTH / width) * height);
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Convert to JPEG format with 0.70 compression quality
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.70);
+                resolve(compressedDataUrl);
+            };
+            img.onerror = () => reject(new Error('Failed to load image for processing'));
+            img.src = e.target.result;
+        };
         reader.onerror = error => reject(error);
     });
 }

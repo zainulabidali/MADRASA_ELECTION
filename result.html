@@ -64,7 +64,9 @@
 
                         html += `
                         <div class="result-candidate-row ${isWinner ? 'is-winner' : ''}">
-                            ${cand.photo ? `<img src="${cand.photo}" class="result-avatar">` : `<div class="result-avatar"></div>`}
+                            <div class="result-avatar">
+                                ${cand.photo ? `<img src="${cand.photo}" class="result-avatar-img">` : ``}
+                            </div>
                             <div class="result-candidate-info">
                                 <div style="display: flex; justify-content: space-between; align-items: baseline;">
                                     <div style="font-size: 18px; font-weight: bold;">
